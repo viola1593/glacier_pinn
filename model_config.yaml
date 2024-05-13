@@ -1,0 +1,111 @@
+experiment:
+  experiment_name: "spitsbergendhdt2014_test29_completedhdt"
+  exp_dir: "CV/allunmappedglaciers_notsurging/reproduce_tests/test30_spitsbergen_completedhdt" 
+wandb:
+  project: spitsbergen_nosurges_allunmapped #allsvalbard_nosurges_onlyglaciers
+  # entity: nleh
+  mode: online
+# ckpt_path: "/home/ml4earth/nils/sea_surface_height_code/cv_time_series/experiments/new_weighted_loss_stconvs2s_c_04-06-2023_08:07:09/epoch=77-step=4417.ckpt"
+model:
+  model: PL_PINN
+  output_dim: 3
+  input_dim: 10
+  hidden_dim: 256 # 256 was good for only 1482
+  num_layers: 8
+  # thick_hidden_dim: 256 # 256 was good for only 1482
+  # thick_num_layers: 4
+  # vel_hidden_dim: 256 # 256 was good for only 1482
+  # vel_num_layers: 4
+  gaussian_mapping_dim: 32 # number of fourier features, 256 might be too much, you can see waves in the prediction, for only 1482 64 was good
+  gaussian_scale: 10.
+
+optimizer:
+  lr: 0.0001
+  # lr_thick: 0.001
+  # lr_vel: 0.0001
+  # max_velocity_epochs: 50
+  # swa_lrs: 1.0e-5 
+  # swa_epoch_start: 0.5
+  # swa_annealing_epochs: 30
+  # lr_warmup_steps: 100 
+
+loss_fn:
+  # type: "nll"
+  # w_land: 0.2
+  # w_in_range: 0.3
+  # w_out_range: 0.5
+  burn_in_epochs: 10 # without pinnloss at first
+  w_thicknessloss: 100
+  w_pinnloss: 10
+  w_depthAvg: 0.1
+  w_VelMag: 0.1
+  w_negative_thickness: 100
+  w_smoothness: 1000
+  #vel_upperbound: 0.95  #not used anymore since we already have the correction for basal sliding 
+  vel_lowerbound: 0.7
+  #w_smoothness_vel: 0
+
+ds:
+  dataset_type: grid # or simple
+  data_dir_unlabeled: 
+   - "data/spitsbergen_allunmapped_griddeddata_nosurges_dhdt2014smoothed_complete.csv"
+  data_dir_labeled: 
+   - "data/spitsbergen_measurements_aggregated_nosurges_dhdt2014smoothed_complete.csv"
+   #-  "data/allsvalbard_allglaciers_measurements_aggregated_nosurges.csv"
+  # - "data/svalbard_millanthick_measurements_interpolated_res100_rgi1482_mb2017_smootheddhdt+vel.csv"
+   # - "data/svalbard_millanthick_measurements_aggregated_res100_westsvalbard_mb2017_smootheddhdt.csv"
+  epsg_crs: 25833
+  #repeat_train_data: 3
+  unlabeled_sample_size: 1.0 # float for fraction of dataframe
+  labeled_sample_size: 1. # if >1: upsampling (with replacement)
+  #data_dir: "data/singleglaciers/consicethickRGI60-07.00514_meas_aggregated.csv"
+  input_features:
+   - POINT_LON #x #POINT_LON # if only working on WS this is fine as all coordinates are in Zone 33
+   - POINT_LAT #y #POINT_LAT 
+   - slope
+   - millan_vx_smoothed
+   - millan_vy_smoothed
+   - beta_v
+   - beta_vx
+   - beta_vy
+   - topo
+   - area
+   - dis_from_border
+  #  - oggm_mb_on_z
+  target:
+   - THICKNESS
+   - apparent_mb2014
+  min_years: 2000 # measurements must be newer than this year
+  #glaciertype: Glacier
+  train_size: 0.6
+  test_size: 0.4
+  num_glaciers: 0 # only train and validate on a subset of glaciers, set to 0 to train on all glaciers
+  glacier_ids: [] # empty list: all glaciers in database are in dataset
+  #max_area: 15000000
+  #num_points: 2000 # number of measurements from each glacier to use
+  #num_points_unlabelled: 5000 #max unlabelled points from each glacier the model will see
+  #problematic_sample_threshold: 10.
+  #update_ds_after_epochs: 400
+  #update_cycle: 20
+  # img_size: [70, 180]
+dataloader: # arguments for dataloader
+  batch_size: 8192
+  num_workers: 4
+pl: # all flags to pytorch lightning trainer
+  devices: [7]
+  # precision: 16
+  accelerator: gpu
+  max_epochs: 100
+  max_steps: -1
+  check_val_every_n_epoch: 10
+  #limit_train_batches: 1.0
+  #limit_val_batches: 0.5
+  #limit_test_batches: 1.0
+  #val_check_interval: 0.5
+  # num_sanity_val_steps: 0
+  deterministic: True
+  detect_anomaly: False
+  fast_dev_run: False
+  log_every_n_steps: 10
+  overfit_batches: 0 # validates on validation dataset!
+  #resume_from_checkpoint: # "grid_experiments/fourierfeatures/rgi1482_realdata_fourieroncoords_burnin_smoothness_09-29-2023_16:53:09/millanThickness_res100_fourier/x0cmb7dl/checkpoints/epoch=81-step=43378.ckpt"
