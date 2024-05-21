@@ -1,0 +1,21 @@
+name: jupyter_env
+channels:
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+    - jupyter
+    - notebook
+    - pandas
+    - matplotlib
+    - numpy
+    - wandb
+    - pytorch-lightning
+    - scikit-learn
+    - pyproj
+    - seaborn
+    - ipykernel
+    - black
+    - isort
+    - flake8
