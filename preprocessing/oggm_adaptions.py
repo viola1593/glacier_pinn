@@ -381,7 +381,7 @@ dhdt_url= 'data/dhdt2014_2019'
 def _get_lookup_csv():
     global _lookup_csv
     if _lookup_csv is None:
-        fname = '../'+dhdt_url + '/hugonnet_dhdt_lookup_csv_20230129.csv'
+        fname = 'hugonnet_dhdt_lookup_csv_20230129.csv'
         _lookup_csv = pd.read_csv(fname, index_col=0) # lookup table to find the correct file for a given lon/lat, adapted from the OGGM lookup table to work with the files for 2015-2020
     return _lookup_csv
 

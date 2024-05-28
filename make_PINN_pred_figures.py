@@ -52,7 +52,7 @@ def plot_depth_avg_velocities(model_avg, cv_dir):
     fig.savefig(cv_dir+'/mean_depth-avg_vel.png', dpi=300)
 
 
-def scatter_preds_with_linearfit(model_avg, x_data: str, title: str, save_as: str=None, y_data: str = 'pinn_thickness',cv_dir: str=None):
+def scatter_preds_with_linearfit(model_avg, x_data: str, title: str, save_as: str=None, y_data: str = 'true_thickness',cv_dir: str=None):
     """Creates scatterplots with x_data at the x axis and y_data on the y axis. 
     Fits a linear curve to the values."""
     pinn_predictions_nonans = model_avg.dropna(subset=[x_data, y_data])
@@ -185,13 +185,15 @@ def interpolate_other_to_PINNthickness(points, values, to_grid_x, to_grid_y):
 def generate_figures(grid_or_measurements='grid', cv_dir=None):
     if grid_or_measurements == 'grid':
         pinn_predictions = pd.read_csv(cv_dir +'/predictions_on_grid.csv', low_memory=False)
+        dataframe_name = 'model_avg_grid.csv'
     if grid_or_measurements == 'measurement':
         pinn_predictions = pd.read_csv(cv_dir +'/predictions_on_measurements.csv', low_memory=False)
+        dataframe_name = 'model_avg_grid_meas.csv'
 
     results_group = pinn_predictions.groupby(['x', 'y']) # group all predictions by each point, so that we get the prediction of all 7 models at this point
     
     # create the average model predictions for each grid point
-    if 'model_avg_grid.csv' not in os.listdir(cv_dir):
+    if dataframe_name not in os.listdir(cv_dir):
         # calculate the means for every grid point
         consensus_thick = results_group.consensus_thickness.mean()
         millan_thick = results_group.millan_ice_thickness.mean()
@@ -199,7 +201,7 @@ def generate_figures(grid_or_measurements='grid', cv_dir=None):
         depth_vel_x =results_group.depth_avg_vel_x.mean()
         depth_vel_y =results_group.depth_avg_vel_y.mean()
 
-        if grid_or_measurements == 'measurements':
+        if grid_or_measurements == 'measurement':
             # add the ground truth data
             true_thick = results_group.true_thickness.mean()
             #concatenate the doubly indexed dataframes along their indices
@@ -216,24 +218,24 @@ def generate_figures(grid_or_measurements='grid', cv_dir=None):
         model_avg['lat'] =  model_avg.y
 
         # # get pelt dataset for comparison and interpolate it to the grid points
-        pelt_thickness = pd.read_csv('data/PELT_thickness_svalbard_update.csv', low_memory=False)
+        pelt_thickness = pd.read_csv('data/PELT_thickness_svalbard_update160524.csv', low_memory=False)
 
         # # Interpolate pelt data to the grid points of the PINN predicitons
         print('interpolating pelt data to grid points...')
         model_avg['interpolated_pelt_data'] = interpolate_other_to_PINNthickness(pelt_thickness[['lon', 'lat']].values, pelt_thickness['data'].values, model_avg.x,  model_avg.y) 
 
-        model_avg.to_csv(cv_dir+'/model_avg_grid.csv', index=False)
+        model_avg.to_csv(cv_dir+'/'+dataframe_name, index=False)
     
     else:
-        model_avg = pd.read_csv(cv_dir+'/model_avg_grid.csv', low_memory=False)
+        model_avg = pd.read_csv(cv_dir+'/'+dataframe_name, low_memory=False)
     # ---------------------------------------------------------------------------------------------------------
 
     # compare to the true thickness if we loaded the dataset with measurements
     if grid_or_measurements == 'measurement':
-        scatter_preds_with_linearfit(model_avg, 'true_thickness', 'Van Pelt\'s ice thickness vs GPR ice thickness', '/pelt_vs_true.png', compare='interpolated_pelt_data',cv_dir=cv_dir)
-        scatter_preds_with_linearfit(model_avg, 'true_thickness', 'Millan\'s ice thickness vs GPR ice thickness', '/millan_vs_true.png', compare='millan_ice_thickness',cv_dir=cv_dir)
-        scatter_preds_with_linearfit(model_avg, 'true_thickness', 'Consensus ice thickness vs GPR ice thickness', '/consensus_vs_true.png', compare='consensus_thickness', cv_dir=cv_dir)
-        scatter_preds_with_linearfit(model_avg, 'true_thickness', 'PINN ice thickness vs GPR ice thickness', '/pinn_vs_true.png', compare='pinn_thickness', cv_dir=cv_dir)
+        scatter_preds_with_linearfit(model_avg, 'interpolated_pelt_data', 'Van Pelt\'s ice thickness vs GPR ice thickness', '/pelt_vs_true.png',  cv_dir=cv_dir)
+        scatter_preds_with_linearfit(model_avg, 'millan_ice_thickness', 'Millan\'s ice thickness vs GPR ice thickness', '/millan_vs_true.png', cv_dir=cv_dir)
+        scatter_preds_with_linearfit(model_avg, 'consensus_thickness', 'Consensus ice thickness vs GPR ice thickness', '/consensus_vs_true.png', cv_dir=cv_dir)
+        scatter_preds_with_linearfit(model_avg, 'pinn_thickness', 'PINN ice thickness vs GPR ice thickness', '/pinn_vs_true.png', cv_dir=cv_dir)
 
         print("RMSE Millan vs True: ", np.sqrt(np.mean((model_avg['millan_ice_thickness'] - model_avg['true_thickness'])**2)))
         print("RMSE Consensus vs True: ", np.sqrt(np.mean((model_avg['consensus_thickness'] - model_avg['true_thickness'])**2)))
@@ -293,6 +295,9 @@ def generate_figures(grid_or_measurements='grid', cv_dir=None):
     print(coeff_var_thick_physics_based.describe())
     print("physics-based std:", model_avg[['consensus_thickness', 'millan_ice_thickness', 'interpolated_pelt_data']].std(axis=1).describe())
     print("90th percentile of coeff_var_physics-based:", coeff_var_thick_physics_based.quantile(0.9))
+
+
+
 
 
 def start():
