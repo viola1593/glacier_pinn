@@ -84,7 +84,7 @@ def plot_residuals(grid_coords, measurement_coords, grid_thickness, residuals, f
     x_grid, y_grid = grid_coords.iloc[:,0], grid_coords.iloc[:,1]
     x_measurement, y_measurement = measurement_coords.iloc[:,0], measurement_coords.iloc[:,1]
     # plot ice thickness and residuals
-    p1 = ax.scatter(x_grid, y_grid, c=grid_thickness, cmap='viridis',marker='.', s=20)
+    p1 = ax.scatter(x_grid, y_grid, c=grid_thickness, cmap='viridis',marker='.', s=20, alpha=0.1)
     p2 = ax.scatter(x_measurement, y_measurement, c=residuals, cmap='RdBu', vmin=-50, vmax=50,marker='.', s=20)
 
     
@@ -322,7 +322,7 @@ def start():
     parser.add_argument("--gpu", type=int, default=0, help="GPU to use.")
     args = parser.parse_args()
         
-    directory = "CV/allunmappedglaciers_notsurging/reproduce_tests/test30_spitsbergen_completedhdt_correct_depth_avg"  
+    directory = "CVresults\LOGO_results"  
     # get datasets
     measurementpath = "data/spitsbergen_measurements_aggregated_nosurges_dhdt2014smoothed_complete.csv"
     gridpath ="data/spitsbergen_allunmapped_griddeddata_nosurges_dhdt2014smoothed_complete.csv"
