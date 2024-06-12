@@ -1,5 +1,8 @@
 """Plotting figures for the manuscript: Here we plot the mean of the cross validatiom predictions. 
-Also we create scatter plots comparing the mean predicted ice thickness to those of Millan et al (2022), Farinotti et al.'s consensus estimate (2020). """
+Also we create scatter plots comparing the mean predicted ice thickness to those of Millan et al (2022), 
+Farinotti et al.'s consensus estimate (2020), and van Pelt, W. and Frank, T.: A new glacier thickness and bed map for Svalbard, EGUsphere [preprint], https://doi.org/10.5194/egusphere-
+2024-1525, 2024. """
+
 import argparse
 import pandas as pd
 import numpy as np
