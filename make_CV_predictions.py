@@ -14,11 +14,11 @@ from utils import read_config, predictions_on_data_with_groundtruth, predictions
 
 
 def make_predicitons(gpu):
-    # get datasets
+    # set path to the datasets that should be used for the predictions
     path_measurements = "data/spitsbergen_measurements_aggregated_nosurges_dhdt2014smoothed_complete.csv"
     path_grid ="data/spitsbergen_allunmapped_griddeddata_nosurges_dhdt2014smoothed_complete.csv"
 
-    # set path to experiment directory
+    # set path to experiment directory where all the CV models are stored
     directory = "CV/allunmappedglaciers_notsurging/reproduce_tests/test30_spitsbergen_completedhdt_correct_depth_avg"
     # create dataframes to store the predictions of every CV fold model
     grid_results_df = pd.DataFrame()
