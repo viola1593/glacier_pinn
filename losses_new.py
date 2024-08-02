@@ -273,8 +273,8 @@ class DepthAvgVelMag_loss(torch.nn.Module):
         
         zero_loss = torch.tensor(0).to(pred.device)
 
-        too_high = torch.where(condition=((1-beta)*obs_mag)<pred_mag, input=((1-beta)*obs_mag-pred_mag)**2, other=zero_loss)
-        too_low = torch.where(condition=pred_mag<=(self.lower*(1-beta)*obs_mag), input=(self.lower*(1-beta)*obs_mag-pred_mag)**2, other=zero_loss)
+        too_high = torch.where(condition=(obs_mag)<pred_mag, input=(obs_mag-pred_mag)**2, other=zero_loss)
+        too_low = torch.where(condition=pred_mag<=((self.lower+(1-self.lower)*beta)*obs_mag), input=((self.lower+(1-self.lower)*beta)*obs_mag-pred_mag)**2, other=zero_loss)
 
         return torch.mean(too_high+too_low)*self.weight
 
@@ -288,7 +288,7 @@ def velocity_loss(v_surf, v_d, lower_bound, beta):
 
     Args:
         v_surf (torch.Tensor): Surface velocity.
-        v_d (torch.Tensor): Desired velocity.
+        v_d (torch.Tensor): Desired depth-averaged velocity.
         lower_bound (float): Lower bound value.
 
     Returns:
@@ -300,10 +300,12 @@ def velocity_loss(v_surf, v_d, lower_bound, beta):
     v_surf_sign = torch.sign(v_surf)
     v_d_sign = torch.sign(v_d)
     # v_surface = v_basal_sliding+ v_deformation --> beta = 90%: 90% basal sliding (from Millan et al. 2022) 
-    # v_deformation = v_surface -v_basal_sliding = (1-beta)*v_surface
-    abs_too_high_same_sign = torch.where(abs((1-beta)* v_surf) < abs(v_d), input= v_d - (1-beta) * v_surf, other=torch.tensor(0))
-    too_low_same_sign = torch.where((lower_bound * (1-beta) * v_surf - v_d) * v_surf_sign > 0, input=(lower_bound * (1-beta) * v_surf - v_d), other=torch.tensor(0)) # only count error if v_d is lower than the lower bound would allow
-    diff_sign = lower_bound * (1-beta) * v_surf - v_d
+    # if v_surf = v_basal_sliding --> v_d = v_surf
+    # if v_basal_sliding = 0 (beta=0) --> v_d <= lower bound * v_surf
+    
+    abs_too_high_same_sign = torch.where(abs(v_surf) < abs(v_d), input= v_d - v_surf, other=torch.tensor(0))
+    too_low_same_sign = torch.where(((lower_bound+(1-lower_bound)*beta) * v_surf - v_d) * v_surf_sign > 0, input=((lower_bound+(1-lower_bound)*beta) * v_surf - v_d), other=torch.tensor(0)) # only count error if v_d is lower than the lower bound would allow
+    diff_sign = (lower_bound+(1-lower_bound)*beta) * v_surf - v_d
 
     # if the sign is different we only count the error diff_sign error, 
     # if the sign is the same we count the error of the too high error (if absolute value is too high) 
