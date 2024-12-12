@@ -1,0 +1,80 @@
+dataloader:
+  batch_size: 512
+  num_workers: 8
+ds:
+  data_dir_labeled:
+  - ../data/synthetic_data/1dsynthetic_glacier_profile.csv
+  data_dir_unlabeled:
+  - ../data/synthetic_data/1dsynthetic_glacier_profile.csv
+  dataset_type: grid
+  glacier_ids: []
+  input_features:
+  - x
+  - surface_velocity
+  - surface_slope
+  - beta
+  - surface_elevation
+  labeled_sample_size: 1.0
+  len_traindataset: 5010
+  num_glaciers: 0
+  num_points: 10
+  target:
+  - ice_thickness
+  - apparent_mass_balance
+  test_size: 0.4
+  train_size: 0.6
+  transformation_features_mean:
+  - 2500.9938115367586
+  - 26.44600837942016
+  - 0.08301281084285306
+  - 0.09999999999999999
+  - 265.48340689473775
+  transformation_features_var:
+  - 1444.5529040022714
+  - 22.154366185456624
+  - 0.021438411563521775
+  - 1.0
+  - 121.1716440482241
+  transformation_target_mean:
+  - 148.75809327536342
+  - -0.11091517945962066
+  transformation_target_var:
+  - 94.6412463785112
+  - 7.651255688234043
+  unlabeled_sample_size: 1.0
+experiment:
+  exp_dir: 1d_experiments
+  experiment_name: datapoints/longertraining300_nophysics
+  save_dir: 1d_experiments/datapoints/longertraining300_nophysics_11-18-2024_09:25:47
+loss_fn:
+  burn_in_epochs: 10
+  vel_lowerbound: 0.7
+  w_VelMag: 0
+  w_depthAvg: 0
+  w_negative_thickness: 0
+  w_pinnloss: 0
+  w_smoothness: 0
+  w_thicknessloss: 10
+model:
+  hidden_dim: 256
+  input_dim: 5
+  model: PL_PINN
+  num_layers: 8
+  output_dim: 2
+optimizer:
+  lr: 0.0001
+pl:
+  accelerator: gpu
+  check_val_every_n_epoch: 10
+  detect_anomaly: false
+  deterministic: true
+  devices:
+  - 6
+  fast_dev_run: false
+  log_every_n_steps: 10
+  max_epochs: 100
+  max_steps: -1
+  overfit_batches: 0
+wandb:
+  mode: online
+  project: synthetic_tests

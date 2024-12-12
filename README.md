@@ -32,3 +32,12 @@ The figures in the manuscript were created by running
 
 4) make_LOGO_figures.py: loads every model from the LOGO_CV, makes predictions of ice thicknesses *only* for the LOGO test glaciers, and stores the result in a new .csv file. Then the ice thickness estimates for each of the glacier is plotted in a single figure. Depending on the command line instructions, either only the residuals to the measured ice thicknesses are plotted or only the predicted ice thickness, or both are are plotted together.
 
+
+## 1d synthetic experiment
+We tested the model on a synthetic dataset (see Appendix). The code to generate the synthetic data and run the experiments, including the config file is in [1d_synthetic_experiment](1d_synthetic_experiment)
+
+## Citation 
+Steidl, V., Bamber, J. L., and Zhu, X. X.: Physics-aware Machine Learning for Glacier Ice Thickness Estimation: A Case Study for Svalbard, EGUsphere [preprint], https://doi.org/10.5194/egusphere-2024-1732, 2024. 
+
+## License
+The code is licensed under the MIT license. T

@@ -1,2 +1,5 @@
 data/
 CVresults/
+*.zip
+*.html
+/README_files
